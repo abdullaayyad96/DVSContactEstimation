@@ -2,6 +2,7 @@ import numpy as np
 import sys
 import h5py
 from random import shuffle
+import tensorflow as tf
 
 
 class DataLoader:
@@ -19,6 +20,5 @@ class DataLoader:
             for i in range(batch_i, np.min([batch_i+batch_size, len(self.data_['ex_output_equalized'])])):
                 inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
                 outputs.append(self.data_['ex_output_equalized'][ind_list[i]])
-
 
             yield np.array(inputs), np.array(outputs)
