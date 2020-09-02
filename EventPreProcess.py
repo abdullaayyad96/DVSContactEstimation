@@ -15,8 +15,8 @@ class EventPreProcess:
         event_iterator = 0
         time_step = time_steps[-1] - time_steps[-2] 
         for ts in time_steps:
-            print("Percentage finished: " + str(event_iterator / len(event_list)))
-            event_image = np.zeros((im_height, im_width, 3), dtype=np.float64)
+            print("Percentage finished: " + str(event_iterator * 100 / len(event_list)))
+            event_image = np.zeros((im_height, im_width, 3), dtype=np.float32)
             counter_matrix = np.zeros((im_height, im_width))
             timestamp_matrix = np.zeros((im_height, im_width))
             
@@ -40,7 +40,7 @@ class EventPreProcess:
                     timestamp_matrix[int(event[1]), int(event[0])] = (np.abs(ts - event[2] - time_step)/time_step) + timestamp_matrix[int(event[1]), int(event[0])]
 
 
-        return event_images_list
+        return event_images_list, event_list[event_iterator:len(event_list)]
 
     
     def EventBinning(event_list, time_steps, im_height=260, im_width=346, n_bin=9, bin_step_size=0.05):
