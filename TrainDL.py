@@ -38,7 +38,8 @@ class TrainDL:
                 scaling_rate = learning_decay_factor * scaling_rate
             j = 0
             for image, output in data_loader.get_batches_fn_timeseries(batch_size):
-                print("Batch {} ...".format(j+1))
+                j = j+1
+                print("Batch {} ...".format(j))
 
                 optimizer, loss = sess.run([train_op, loss_function], 
                                 feed_dict={input_tensor: image, truth_tensor: output, learning_rate: scaling_rate*base_learning_rate})

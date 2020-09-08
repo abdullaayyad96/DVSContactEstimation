@@ -1,0 +1,9 @@
+find * -size +1G | cat >> .gitignore
+__pycache__/
+tactile_sensing_data/
+*.hdf5
+*.pyc
+*.data*
+*checkpoint
+*.meta
+*.index

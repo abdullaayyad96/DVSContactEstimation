@@ -229,7 +229,7 @@ class DlModels:
         return pool_5, conv5_3, conv4_3, conv3_3, conv2_2, conv1_2
 
     
-    def Conv2Dx1(input_tensor):
+    def Conv2Dx2(input_tensor):
         #Layer 1: Convolutional
         conv1_1 = tf2.keras.layers.TimeDistributed(tf.layers.Conv2D(kernel_size=5, filters=12, strides=1, padding='same', 
                     kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
@@ -249,6 +249,19 @@ class DlModels:
         pool_2 = tf2.keras.layers.TimeDistributed(tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_2'))(conv2_1)
 
         return pool_2, conv2_1, conv1_1
+
+
+    def Conv2Dx1(input_tensor):
+        #Layer 1: Convolutional
+        conv1_1 = tf2.keras.layers.TimeDistributed(tf.layers.Conv2D(kernel_size=5, filters=20, strides=3, padding='same', 
+                    kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
+                    kernel_regularizer=tf2.keras.regularizers.l2(), bias_regularizer=tf2.keras.regularizers.l2(), activation='relu',
+                    name='conv1_1'))(input_tensor)
+
+        #pooling function
+        pool_1 = tf2.keras.layers.TimeDistributed(tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_1'))(conv1_1)
+
+        return pool_1, conv1_1, conv1_1
 
     def vggDecoder(input_tensor, encoder):
         encoder_output, layer5, layer4, layer3, layer2, layer1 = encoder(input_tensor)
@@ -371,7 +384,7 @@ class DlModels:
         encoder_output, layer2, layer1 = encoder(input_tensor)
 
         #Convolutional LSTM
-        LSTMLayer = tf2.keras.layers.ConvLSTM2D(filters = 24, kernel_size=5, padding='same', activation='relu', return_sequences=False)(encoder_output)    
+        LSTMLayer = tf2.keras.layers.ConvLSTM2D(filters = 20, kernel_size=5, padding='same', activation='relu', return_sequences=False)(encoder_output)    
 
         #pooling function
         pool = tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool')(LSTMLayer) 
@@ -381,4 +394,5 @@ class DlModels:
         output_layer = tf2.keras.layers.Dense(N_outputs)(flat)
 
         return output_layer
+
 
