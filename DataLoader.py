@@ -21,11 +21,13 @@ class DataLoader:
         for batch_i in range(0, len(ind_list), batch_size):
             inputs = []
             outputs = []
+            batch_i_size = 0
             for i in range(batch_i, np.min([batch_i+batch_size, len(ind_list)])):
                 inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
                 outputs.append(self.data_['ex_output_equalized'][ind_list[i]])
+                batch_i_size = batch_i_size + 1
 
-            yield np.array(inputs), np.array(outputs)
+            yield np.array(inputs), np.array(outputs), batch_i_size
 
     def get_batches_fn_timeseries(self, batch_size):
         # shuffle data
@@ -35,31 +37,37 @@ class DataLoader:
         for batch_i in range(0, len(self.data_['ex_output_equalized']), batch_size):
             inputs = []
             outputs = []
+            batch_i_size = 0
             for i in range(batch_i, np.min([batch_i+batch_size, len(self.data_['ex_output_equalized'])])):
                 inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
                 outputs.append(self.data_['ex_output_equalized'][ind_list[i]])
+                batch_i_size = batch_i_size + 1
 
-            yield np.array(inputs), np.array(outputs)
+            yield np.array(inputs), np.array(outputs), batch_i_size
 
     def get_validation_data(self):
         # shuffle data
         inputs = []
         outputs = []
+        valid_size = 0
         for i in range(0, len(self.valid_idx)):
             inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]])
             outputs.append(self.data_['ex_output_equalized'][self.valid_idx[i]])
+            valid_size = valid_size + 1
 
-        return np.array(inputs), np.array(outputs)
+        return np.array(inputs), np.array(outputs), valid_size
 
     def get_test_data(self):
         # shuffle data
         inputs = []
         outputs = []
+        test_size = 0
         for i in range(0, len(self.test_idx)):
             inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]])
             outputs.append(self.data_['ex_output_equalized'][self.test_idx[i]])
-
-        return np.array(inputs), np.array(outputs)
+            test_size = test_size + 1
+    
+        return np.array(inputs), np.array(outputs), test_size
 
     def load_all(self, start_idx=0, end_idx=-1, step_size=1):
         if end_idx==-1:

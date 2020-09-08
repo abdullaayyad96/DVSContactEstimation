@@ -253,13 +253,13 @@ class DlModels:
 
     def Conv2Dx1(input_tensor):
         #Layer 1: Convolutional
-        conv1_1 = tf2.keras.layers.TimeDistributed(tf.layers.Conv2D(kernel_size=5, filters=20, strides=3, padding='same', 
+        conv1_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Conv2D(kernel_size=5, filters=20, strides=3, padding='same', 
                     kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
                     kernel_regularizer=tf2.keras.regularizers.l2(), bias_regularizer=tf2.keras.regularizers.l2(), activation='relu',
                     name='conv1_1'))(input_tensor)
 
         #pooling function
-        pool_1 = tf2.keras.layers.TimeDistributed(tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_1'))(conv1_1)
+        pool_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.MaxPool2D(pool_size=3, strides=3, padding='same', name='pool_1'))(conv1_1)
 
         return pool_1, conv1_1, conv1_1
 
@@ -379,20 +379,22 @@ class DlModels:
         return output_layer
 
 
-    def Conv2dx2LSTMFC(input_tensor, encoder=Conv2Dx1, N_outputs=6):
+    def Conv2dx2LSTMFC(input_tensor, initial_hidden_state, initial_carry_state, encoder=Conv2Dx1, N_outputs=6):
 
         encoder_output, layer2, layer1 = encoder(input_tensor)
 
         #Convolutional LSTM
-        LSTMLayer = tf2.keras.layers.ConvLSTM2D(filters = 20, kernel_size=5, padding='same', activation='relu', return_sequences=False)(encoder_output)    
-
+        LSTMLayer, hidden_state, carry_state = tf2.keras.layers.ConvLSTM2D(filters = 20, kernel_size=5, padding='same', activation='relu', return_sequences=False, return_state=True)(inputs=encoder_output, initial_state=[initial_hidden_state, initial_carry_state])    
+        #initial_state=[tf.ones((70, 29, 39, 20)), tf.ones((70, 29, 39, 20))])    
+        # , initial_state=[tf.ones((20, 20)), tf.ones((20, 20))]
+        
         #pooling function
-        pool = tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool')(LSTMLayer) 
+        pool = tf2.keras.layers.MaxPool2D(pool_size=3, strides=3, padding='same', name='pool')(LSTMLayer) 
 
         flat =tf2.keras.layers.Flatten()(pool)
 
         output_layer = tf2.keras.layers.Dense(N_outputs)(flat)
 
-        return output_layer
+        return output_layer, hidden_state, carry_state
 
 

@@ -5,8 +5,8 @@ from DataLoader import DataLoader
 
 class TrainDL:
 
-    def train_nn(sess, epochs, batch_size, data_loader, accuracy_op, train_op, loss_function, input_tensor,
-             truth_tensor, learning_rate, base_learning_rate,
+    def train_nn(sess, epochs, nn_last_layer, hidden_state, carry_state, batch_size, data_loader, accuracy_op, train_op, loss_function, input_tensor,
+             truth_tensor, initial_hidden_state, initial_carry_state, learning_rate, base_learning_rate,
              learning_decay_rate, learning_decay_factor):
         """
         Train neural network and print    out the loss during training.
@@ -38,19 +38,25 @@ class TrainDL:
                 scaling_rate = learning_decay_factor * scaling_rate
             j = 0
             sum_accuracy = 0
-            for image, output in data_loader.get_train_batches_fn_timeseries(batch_size):
-                optimizer, loss = sess.run([train_op, loss_function], 
-                                feed_dict={input_tensor: image, truth_tensor: output, learning_rate: scaling_rate*base_learning_rate})
-
+            for image, output, batch_i_size in data_loader.get_train_batches_fn_timeseries(batch_size):
+                initial_state_value = np.zeros(shape=(batch_i_size, 29, 39, 20), dtype=float)
+                
+                lstm_hidden_state, lstm_carry_state, optimizer, loss = sess.run([hidden_state, carry_state, train_op, loss_function], 
+                                feed_dict={input_tensor: image, truth_tensor: output, initial_hidden_state: initial_state_value, initial_carry_state: initial_state_value, learning_rate: scaling_rate*base_learning_rate})
+                
+                #print(np.shape(lstm_hidden_state))
+                #print(np.shape(lstm_carry_state))
+                
                 accuracy = sess.run([accuracy_op],
-                                feed_dict={input_tensor: image, truth_tensor: output})
+                                feed_dict={input_tensor: image, truth_tensor: output, initial_hidden_state: initial_state_value, initial_carry_state: initial_state_value})
                                 
                 sum_accuracy = sum_accuracy + accuracy[0]
                 j = j+1
 
-            valid_x, valid_y = data_loader.get_validation_data()
+            valid_x, valid_y, valid_size = data_loader.get_validation_data()
+            initial_state_value = np.zeros(shape=(valid_size, 29, 39, 20), dtype=float)
             valid_accuracy = sess.run([accuracy_op],
-                                feed_dict={input_tensor: valid_x, truth_tensor: valid_y})
+                                feed_dict={input_tensor: valid_x, truth_tensor: valid_y, initial_hidden_state: initial_state_value, initial_carry_state: initial_state_value})
             print("Train Accuracy {} ...".format(sum_accuracy/j))
             print("Validation Accuracy {} ...".format(valid_accuracy))
                                 
