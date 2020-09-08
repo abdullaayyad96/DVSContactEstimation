@@ -22,3 +22,10 @@ class DataLoader:
                 outputs.append(self.data_['ex_output_equalized'][ind_list[i]])
 
             yield np.array(inputs), np.array(outputs)
+
+    def load_all(self, start_idx=0, end_idx=-1, step_size=1):
+        if end_idx==-1:
+            end_idx = len(self.data_['event_images'])
+
+        for i in range(start_idx, end_idx, step_size):
+            yield self.data_['event_images'][i], self.data_['contact_status']

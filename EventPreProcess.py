@@ -43,6 +43,37 @@ class EventPreProcess:
         return event_images_list, event_list[event_iterator:len(event_list)]
 
     
+    #FrameGeneration static method
+    @staticmethod
+    def generateFrames(event_list, time_steps, im_height=260, im_width=346):
+        #Group Events into frames, positive frames count positively while negative subtract
+        #Channel 1: count of positive events at each pixel position
+        #Channel 2: count of negative events at each pixel position
+        #Channel 3: normalized timestamp of events generated at pixel position
+        event_images_list = []
+
+        event_iterator = 0
+        for ts in time_steps:
+            print("Percentage finished: " + str(event_iterator * 100 / len(event_list)))
+            event_image = np.zeros((im_height, im_width), dtype=np.float32)
+            
+            for i in range(event_iterator, len(event_list)):
+                event_iterator = i + 1
+                event = np.copy(event_list[i])
+                if event[2] > ts:
+                    event_image[201, 154] = 0
+                    event_images_list.append(np.expand_dims(np.copy(event_image), axis=2)) 
+                    break
+                else:
+                    if event[3] > 0:
+                        event_image[int(event[1]), int(event[0])] = event_image[int(event[1]), int(event[0])] + 1.0
+                    else:
+                        event_image[int(event[1]), int(event[0])] = event_image[int(event[1]), int(event[0])] - 1.0             
+
+
+        return event_images_list, event_list[event_iterator:len(event_list)]
+
+    
     def EventBinning(event_list, time_steps, im_height=260, im_width=346, n_bin=9, bin_step_size=0.05):
         #Bin event into n_bin, each bin_step_size apart as described in "Unsupervised Event-based Learning of Optical Flow, Depth, and Egomotion"
         #The time of the first bin should correspond to the elements in time_steps
