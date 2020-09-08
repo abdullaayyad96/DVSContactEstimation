@@ -37,17 +37,22 @@ class TrainDL:
             if i%learning_decay_rate == 0 and i != 0:
                 scaling_rate = learning_decay_factor * scaling_rate
             j = 0
-            for image, output in data_loader.get_batches_fn_timeseries(batch_size):
-                j = j+1
-                print("Batch {} ...".format(j))
-
+            sum_accuracy = 0
+            for image, output in data_loader.get_train_batches_fn_timeseries(batch_size):
                 optimizer, loss = sess.run([train_op, loss_function], 
                                 feed_dict={input_tensor: image, truth_tensor: output, learning_rate: scaling_rate*base_learning_rate})
 
                 accuracy = sess.run([accuracy_op],
                                 feed_dict={input_tensor: image, truth_tensor: output})
+                                
+                sum_accuracy = sum_accuracy + accuracy[0]
+                j = j+1
 
-                print("Accuracy {} ...".format(accuracy))
+            valid_x, valid_y = data_loader.get_validation_data()
+            valid_accuracy = sess.run([accuracy_op],
+                                feed_dict={input_tensor: valid_x, truth_tensor: valid_y})
+            print("Train Accuracy {} ...".format(sum_accuracy/j))
+            print("Validation Accuracy {} ...".format(valid_accuracy))
                                 
             
             
