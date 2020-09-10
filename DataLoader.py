@@ -29,6 +29,24 @@ class DataLoader:
 
             yield np.array(inputs), np.array(outputs), batch_i_size
 
+    def get_train_batches_fn_timeseries_sequence(self, batch_size):
+        # shuffle data
+        ind_list = [i for i in range(len(self.train_idx))]
+        shuffle(ind_list)
+
+        for batch_i in range(0, len(ind_list), batch_size):
+            inputs = []
+            outputs = []
+            batch_i_size = 0
+            for i in range(batch_i, np.min([batch_i+batch_size, len(ind_list)])):
+                inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
+                ref_vec = np.array(self.data_['contact_status'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]], dtype=int).reshape(-1)
+                one_hot_mat = np.eye(18)[ref_vec]
+                outputs.append(one_hot_mat.tolist())
+                batch_i_size = batch_i_size + 1
+                
+            yield np.array(inputs), np.array(outputs), batch_i_size
+
     def get_batches_fn_timeseries(self, batch_size):
         # shuffle data
         ind_list = [i for i in range(len(self.data_['ex_output_equalized']))]
@@ -57,6 +75,20 @@ class DataLoader:
 
         return np.array(inputs), np.array(outputs), valid_size
 
+    def get_validation_data_sequence(self):
+        # shuffle data
+        inputs = []
+        outputs = []
+        valid_size = 0
+        for i in range(0, len(self.valid_idx)):
+            inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]])
+            ref_vec = np.array(self.data_['contact_status'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]], dtype=int).reshape(-1)
+            one_hot_mat = np.eye(18)[ref_vec]
+            outputs.append(one_hot_mat.tolist())
+            valid_size = valid_size + 1
+
+        return np.array(inputs), np.array(outputs), valid_size
+
     def get_test_data(self):
         # shuffle data
         inputs = []
@@ -65,6 +97,20 @@ class DataLoader:
         for i in range(0, len(self.test_idx)):
             inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]])
             outputs.append(self.data_['ex_output_equalized'][self.test_idx[i]])
+            test_size = test_size + 1
+    
+        return np.array(inputs), np.array(outputs), test_size
+
+    def get_test_data_sequence(self):
+        # shuffle data
+        inputs = []
+        outputs = []
+        test_size = 0
+        for i in range(0, len(self.test_idx)):
+            inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]])
+            ref_vec = np.array(self.data_['contact_status'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]], dtype=int).reshape(-1)
+            one_hot_mat = np.eye(18)[ref_vec]
+            outputs.append(one_hot_mat.tolist())
             test_size = test_size + 1
     
         return np.array(inputs), np.array(outputs), test_size

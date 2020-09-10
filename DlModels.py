@@ -396,5 +396,25 @@ class DlModels:
         output_layer = tf2.keras.layers.Dense(N_outputs)(flat)
 
         return output_layer, hidden_state, carry_state
+    
+    def Conv2dx2LSTMFC_sequence(input_tensor, initial_hidden_state, initial_carry_state, encoder=Conv2Dx1, N_outputs=6):
+
+        encoder_output, layer2, layer1 = encoder(input_tensor)
+
+        #Convolutional LSTM
+        LSTMLayer, hidden_state, carry_state = tf2.keras.layers.ConvLSTM2D(filters = 20, kernel_size=5, padding='same', activation='relu', return_sequences=True, return_state=True)(inputs=encoder_output, initial_state=[initial_hidden_state, initial_carry_state])    
+        #initial_state=[tf.ones((70, 29, 39, 20)), tf.ones((70, 29, 39, 20))])    
+        # , initial_state=[tf.ones((20, 20)), tf.ones((20, 20))]
+        
+        #pooling function
+        pool = tf2.keras.layers.TimeDistributed(tf2.keras.layers.MaxPool2D(pool_size=3, strides=3, padding='same', name='pool'))(LSTMLayer) 
+
+        flat = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Flatten())(pool)
+        
+        drouput_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dropout(0.3))(flat)
+
+        output_layer = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dense(N_outputs))(drouput_1)
+
+        return output_layer, hidden_state, carry_state
 
 
