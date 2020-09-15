@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 
 class EventPreProcess:
 
@@ -62,7 +63,7 @@ class EventPreProcess:
                 event = np.copy(event_list[i])
                 if event[2] > ts:
                     event_image[201, 154] = 0
-                    event_images_list.append(np.expand_dims(np.copy(event_image), axis=2)) 
+                    event_images_list.append(np.copy(event_image)) 
                     break
                 else:
                     if event[3] > 0:
@@ -72,6 +73,64 @@ class EventPreProcess:
 
 
         return event_images_list, event_list[event_iterator:len(event_list)]
+
+    #cropFrames static method
+    @staticmethod
+    def cropFrames(image_list, circle_center=(173, 130), circle_rad=100, im_height=260, im_width=346):
+        
+        cropped_image_list = []
+
+        for image in image_list:
+            mask = np.zeros((im_height, im_width), dtype=np.float32)
+            cv2.circle(mask, circle_center, circle_rad, 1, -1, 8, 0)
+            cropped_image = np.multiply(mask, image)
+
+            cropped_image_list.append(np.expand_dims(np.copy(cropped_image), axis=2)) 
+
+        return cropped_image_list
+
+    #rotateFrames static method
+    @staticmethod
+    def rotateFrames(image_list, circle_center=(173, 130), rotate_angle=90, im_height=260, im_width=346):
+        
+        rotated_image_list = []
+
+        for image in image_list:
+            rot_mat = cv2.getRotationMatrix2D(circle_center, rotate_angle, 1.0)
+            rotated_image = cv2.warpAffine(image[:,:,0], rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+
+            rotated_image_list.append(np.expand_dims(np.copy(rotated_image), axis=2)) 
+
+        return rotated_image_list
+
+    #updateContactStatus static method
+    @staticmethod
+    def updateContactStatus(list_of_current_contact_status, list_of_rotations, rotation_angle):
+        
+        list_of_rotated_contact_status = []
+
+        rot_mat = np.array([ [math.cos(rotation_angle*math.pi/180), math.sin(rotation_angle*math.pi/180)], [-math.sin(rotation_angle*math.pi/180), math.cos(rotation_angle*math.pi/180)] ])
+
+        for contact_status in list_of_current_contact_status:
+            if contact_status == 0:
+                list_of_rotated_contact_status.append(0)
+            else:
+                current_rotation = list_of_rotations[int(contact_status)-1]
+                rotated_contact_status = np.matmul(rot_mat, current_rotation[0:2])
+                best_rot_diff = 100
+                best_rot_idx = 1
+                i = 1
+                for rot in list_of_rotations:
+                    diff_vals = np.sqrt( np.power(rot[0] - rotated_contact_status[0], 2) +  np.power(rot[1] - rotated_contact_status[1], 2))
+                    if best_rot_diff > diff_vals:
+                        best_rot_diff = diff_vals
+                        best_rot_idx = i
+                    i = i + 1
+
+                list_of_rotated_contact_status.append(best_rot_idx)
+
+
+        return list_of_rotated_contact_status
 
     
     def EventBinning(event_list, time_steps, im_height=260, im_width=346, n_bin=9, bin_step_size=0.05):
