@@ -23,7 +23,7 @@ class DataLoader:
             outputs = []
             batch_i_size = 0
             for i in range(batch_i, np.min([batch_i+batch_size, len(ind_list)])):
-                inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
+                inputs.append(self.data_['event_images_augmented'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
                 outputs.append(self.data_['ex_output_equalized'][ind_list[i]])
                 batch_i_size = batch_i_size + 1
 
@@ -39,8 +39,8 @@ class DataLoader:
             outputs = []
             batch_i_size = 0
             for i in range(batch_i, np.min([batch_i+batch_size, len(ind_list)])):
-                inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
-                ref_vec = np.array(self.data_['contact_status'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]], dtype=int).reshape(-1)
+                inputs.append(self.data_['event_images_augmented'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
+                ref_vec = np.array(self.data_['contact_status_augmented'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]], dtype=int).reshape(-1)
                 one_hot_mat = np.eye(18)[ref_vec]
                 outputs.append(one_hot_mat.tolist())
                 batch_i_size = batch_i_size + 1
@@ -57,7 +57,7 @@ class DataLoader:
             outputs = []
             batch_i_size = 0
             for i in range(batch_i, np.min([batch_i+batch_size, len(self.data_['ex_output_equalized'])])):
-                inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
+                inputs.append(self.data_['event_images_augmented'][self.data_['ex_input_image_idx_equalized'][ind_list[i]]])
                 outputs.append(self.data_['ex_output_equalized'][ind_list[i]])
                 batch_i_size = batch_i_size + 1
 
@@ -69,7 +69,7 @@ class DataLoader:
         outputs = []
         valid_size = 0
         for i in range(0, len(self.valid_idx)):
-            inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]])
+            inputs.append(self.data_['event_images_augmented'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]])
             outputs.append(self.data_['ex_output_equalized'][self.valid_idx[i]])
             valid_size = valid_size + 1
 
@@ -81,8 +81,8 @@ class DataLoader:
         outputs = []
         valid_size = 0
         for i in range(0, len(self.valid_idx)):
-            inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]])
-            ref_vec = np.array(self.data_['contact_status'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]], dtype=int).reshape(-1)
+            inputs.append(self.data_['event_images_augmented'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]])
+            ref_vec = np.array(self.data_['contact_status_augmented'][self.data_['ex_input_image_idx_equalized'][self.valid_idx[i]]], dtype=int).reshape(-1)
             one_hot_mat = np.eye(18)[ref_vec]
             outputs.append(one_hot_mat.tolist())
             valid_size = valid_size + 1
@@ -95,7 +95,7 @@ class DataLoader:
         outputs = []
         test_size = 0
         for i in range(0, len(self.test_idx)):
-            inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]])
+            inputs.append(self.data_['event_images_augmented'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]])
             outputs.append(self.data_['ex_output_equalized'][self.test_idx[i]])
             test_size = test_size + 1
     
@@ -107,8 +107,8 @@ class DataLoader:
         outputs = []
         test_size = 0
         for i in range(0, len(self.test_idx)):
-            inputs.append(self.data_['event_images'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]])
-            ref_vec = np.array(self.data_['contact_status'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]], dtype=int).reshape(-1)
+            inputs.append(self.data_['event_images_augmented'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]])
+            ref_vec = np.array(self.data_['contact_status_augmented'][self.data_['ex_input_image_idx_equalized'][self.test_idx[i]]], dtype=int).reshape(-1)
             one_hot_mat = np.eye(18)[ref_vec]
             outputs.append(one_hot_mat.tolist())
             test_size = test_size + 1
@@ -117,10 +117,10 @@ class DataLoader:
 
     def load_all(self, start_idx=0, end_idx=-1, step_size=1):
         if end_idx==-1:
-            end_idx = len(self.data_['event_images'])
+            end_idx = len(self.data_['event_images_augmented'])
 
         for i in range(start_idx, end_idx, step_size):
-            yield self.data_['event_images'][i], self.data_['contact_status']
+            yield self.data_['event_images_augmented'][i], self.data_['contact_status']
 
 
     def divide_data(self, train_percentage=0.7, valid_percentage=0.15, test_percentage=0.15):
