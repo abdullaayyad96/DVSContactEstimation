@@ -253,7 +253,7 @@ class DlModels:
 
     def Conv2Dx1(input_tensor):
         #Layer 1: Convolutional
-        conv1_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Conv2D(kernel_size=5, filters=20, strides=3, padding='same', 
+        conv1_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Conv2D(kernel_size=5, filters=30, strides=3, padding='same', 
                     kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
                     kernel_regularizer=tf2.keras.regularizers.l2(), bias_regularizer=tf2.keras.regularizers.l2(), activation='relu',
                     name='conv1_1'))(input_tensor)
@@ -411,9 +411,21 @@ class DlModels:
 
         flat = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Flatten())(pool)
         
-        drouput_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dropout(0.3))(flat)
-
-        output_layer = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dense(N_outputs))(drouput_1)
+        drouput_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dropout(0.5))(flat)
+        
+        tanh_1 = tf.keras.activations.tanh(drouput_1)
+        
+        dense_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dense(70))(tanh_1)    
+        
+        drouput_2 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dropout(0.5))(dense_1)
+        
+        tanh_2 = tf.keras.activations.tanh(drouput_2)  
+        
+        output_layer = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dense(N_outputs))(tanh_2)        
+        
+        output_layer = tf.identity(output_layer, name="nn_last_layer")
+        hidden_state = tf.identity(hidden_state, name="hidden_state")
+        carry_state = tf.identity(carry_state, name="carry_state")
 
         return output_layer, hidden_state, carry_state
 
