@@ -38,6 +38,7 @@ class TrainDL:
                 scaling_rate = learning_decay_factor * scaling_rate
             j = 0
             sum_accuracy = 0
+            sum_loss = 0
             for image, output, batch_i_size in data_loader.get_train_batches_fn_timeseries_sequence(batch_size):
                 initial_state_value = np.zeros(shape=(batch_i_size, 29, 39, 20), dtype=float)
                 
@@ -48,15 +49,18 @@ class TrainDL:
                 #print(np.shape(lstm_hidden_state))
                 #print(np.shape(lstm_carry_state))
                 
-                accuracy = sess.run([accuracy_op], feed_dict={input_tensor: image, truth_tensor: output, initial_hidden_state: initial_state_value, initial_carry_state: initial_state_value})
-                                
-                sum_accuracy = sum_accuracy + accuracy[0]
+                accuracy, loss_output = sess.run([accuracy_op, loss_function], feed_dict={input_tensor: image, truth_tensor: output, initial_hidden_state: initial_state_value, initial_carry_state: initial_state_value})
+                
+                #print(np.shape(loss_output))
+                sum_accuracy = sum_accuracy + accuracy
+                sum_loss = sum_loss + loss_output
                 j = j+1
 
             valid_x, valid_y, valid_size = data_loader.get_validation_data_sequence()
             initial_state_value = np.zeros(shape=(valid_size, 29, 39, 20), dtype=float)
             valid_accuracy = sess.run([accuracy_op],
                                 feed_dict={input_tensor: valid_x, truth_tensor: valid_y, initial_hidden_state: initial_state_value, initial_carry_state: initial_state_value})
+            print("Loss {} ...".format(sum_loss/j))
             print("Train Accuracy {} ...".format(sum_accuracy/j))
             print("Validation Accuracy {} ...".format(valid_accuracy))
                                 
@@ -72,8 +76,8 @@ class TrainDL:
         :return: Tuple of (logits, train_op, cross_entropy_loss)
         """    
         
-        loss = tf2.keras.backend.sum(tf2.nn.softmax_cross_entropy_with_logits(tf2.stop_gradient(correct_label), nn_last_layer))
-        
+        loss = tf2.math.reduce_sum( tf2.nn.softmax_cross_entropy_with_logits(tf2.stop_gradient(correct_label[:,12:38,:]), nn_last_layer[:,12:38,:]))
+                
         #obtain training operation
         optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate, epsilon = 1e-8) #Note default value of epsilon 1e-8 results in instability after few epochs
     
@@ -94,7 +98,7 @@ class TrainDL:
         :return: Tuple of (logits, train_op, cross_entropy_loss)
         """    
         
-        loss = tf2.keras.backend.sum( tf2.keras.layers.TimeDistributed(tf2.nn.softmax_cross_entropy_with_logits(tf2.stop_gradient(correct_label), nn_last_layer)))
+        loss = tf2.math.reduce_sum( tf2.keras.layers.TimeDistributed(tf2.nn.softmax_cross_entropy_with_logits(tf2.stop_gradient(correct_label), nn_last_layer)))
         
         #obtain training operation
         optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate, epsilon = 1e-8) #Note default value of epsilon 1e-8 results in instability after few epochs

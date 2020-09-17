@@ -402,7 +402,7 @@ class DlModels:
         encoder_output, layer2, layer1 = encoder(input_tensor)
 
         #Convolutional LSTM
-        LSTMLayer, hidden_state, carry_state = tf2.keras.layers.ConvLSTM2D(filters = 20, kernel_size=5, padding='same', activation='relu', return_sequences=True, return_state=True)(inputs=encoder_output, initial_state=[initial_hidden_state, initial_carry_state])    
+        LSTMLayer, hidden_state, carry_state = tf2.keras.layers.ConvLSTM2D(filters = 20, kernel_size=5, padding='same', activation='relu', kernel_initializer='orthogonal', return_sequences=True, return_state=True)(inputs=encoder_output, initial_state=[initial_hidden_state, initial_carry_state])    
         #initial_state=[tf.ones((70, 29, 39, 20)), tf.ones((70, 29, 39, 20))])    
         # , initial_state=[tf.ones((20, 20)), tf.ones((20, 20))]
         
@@ -413,15 +413,15 @@ class DlModels:
         
         drouput_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dropout(0.5))(flat)
         
-        tanh_1 = tf.keras.activations.tanh(drouput_1)
+        #tanh_1 = tf.keras.activations.tanh(drouput_1)
         
-        dense_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dense(70))(tanh_1)    
+        dense_1 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dense(70, kernel_initializer='orthogonal', bias_initializer='glorot_uniform'))(drouput_1)    
         
         drouput_2 = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dropout(0.5))(dense_1)
         
         tanh_2 = tf.keras.activations.tanh(drouput_2)  
         
-        output_layer = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dense(N_outputs))(tanh_2)        
+        output_layer = tf2.keras.layers.TimeDistributed(tf2.keras.layers.Dense(N_outputs, kernel_initializer='orthogonal', bias_initializer='glorot_uniform'))(tanh_2)        
         
         output_layer = tf.identity(output_layer, name="nn_last_layer")
         hidden_state = tf.identity(hidden_state, name="hidden_state")
