@@ -62,6 +62,12 @@ class DataLoader:
                 batch_i_size = batch_i_size + 1
 
             yield np.array(inputs), np.array(outputs), batch_i_size
+            
+    def get_full_data_sequence(self):
+        
+        for i in range(len(self.data_['event_images_augmented'])):
+            
+            yield np.array([[self.data_['event_images_augmented'][i]]]), np.array([self.data_['contact_status_augmented'][i]])
 
     def get_validation_data(self):
         # shuffle data
