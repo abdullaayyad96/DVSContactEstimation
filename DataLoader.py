@@ -63,11 +63,11 @@ class DataLoader:
 
             yield np.array(inputs), np.array(outputs), batch_i_size
             
-    def get_full_data_sequence(self):
+    def get_full_data_sequence(self, start=0):
         
-        for i in range(len(self.data_['event_images_augmented'])):
+        for i in range(start, len(self.data_['event_images'])):
             
-            yield np.array([[self.data_['event_images_augmented'][i]]]), np.array([self.data_['contact_status_augmented'][i]])
+            yield np.array([[self.data_['event_images'][i]]]), np.array([self.data_['contact_status'][i]])
 
     def get_validation_data(self):
         # shuffle data
@@ -132,8 +132,12 @@ class DataLoader:
     def divide_data(self, train_percentage=0.7, valid_percentage=0.15, test_percentage=0.15):
         ind_list = [i for i in range(len(self.data_['ex_output_equalized']))]
         shuffle(ind_list)
-
-        self.train_idx, valid_test_idx = train_test_split(ind_list, test_size=(1-train_percentage))
-        self.valid_idx, self.test_idx = train_test_split(valid_test_idx, test_size=(test_percentage/(test_percentage+valid_percentage)))
+        if test_percentage < 1:
+            self.train_idx, valid_test_idx = train_test_split(ind_list, test_size=(1-train_percentage))
+            self.valid_idx, self.test_idx = train_test_split(valid_test_idx, test_size=(test_percentage/(test_percentage+valid_percentage)))
+        else:
+            self.train_idx = []
+            self.valid_idx = []
+            self.test_idx = [i for i in range(len(self.data_['ex_output_equalized']))]
         
 
