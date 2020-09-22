@@ -46,7 +46,7 @@ class EventPreProcess:
     
     #FrameGeneration static method
     @staticmethod
-    def generateFrames(event_list, time_steps, im_height=260, im_width=346):
+    def generateFrames(event_list, time_steps, im_height=260, im_width=346, im_channel=1):
         #Group Events into frames, positive frames count positively while negative subtract
         #Channel 1: count of positive events at each pixel position
         #Channel 2: count of negative events at each pixel position
@@ -56,50 +56,57 @@ class EventPreProcess:
         event_iterator = 0
         for ts in time_steps:
             print("Percentage finished: " + str(event_iterator * 100 / len(event_list)))
-            event_image = np.zeros((im_height, im_width), dtype=np.float32)
+            event_image = np.zeros((im_height, im_width, im_channel), dtype=np.float32)
             
             for i in range(event_iterator, len(event_list)):
                 event_iterator = i + 1
                 event = np.copy(event_list[i])
                 if event[2] > ts:
-                    event_image[201, 154] = 0
+                    event_image[201, 154, 0] = 0
                     event_images_list.append(np.copy(event_image)) 
                     break
                 else:
                     if event[3] > 0:
-                        event_image[int(event[1]), int(event[0])] = event_image[int(event[1]), int(event[0])] + 1.0
+                        event_image[int(event[1]), int(event[0]), 0] = event_image[int(event[1]), int(event[0]), 0] + 1.0
                     else:
-                        event_image[int(event[1]), int(event[0])] = event_image[int(event[1]), int(event[0])] - 1.0             
+                        event_image[int(event[1]), int(event[0]), 0] = event_image[int(event[1]), int(event[0]), 0] - 1.0             
 
 
         return event_images_list, event_list[event_iterator:len(event_list)]
 
     #cropFrames static method
     @staticmethod
-    def cropFrames(image_list, circle_center=(173, 130), circle_rad=100, im_height=260, im_width=346):
+    def cropFrames(image_list, circle_center=(173, 130), circle_rad=100, im_height=260, im_width=346, im_channels=1, expand_dims=False):
         
         cropped_image_list = []
-
+        i=0
         for image in image_list:
-            mask = np.zeros((im_height, im_width), dtype=np.float32)
-            cv2.circle(mask, circle_center, circle_rad, 1, -1, 8, 0)
+            mask = np.zeros((im_height, im_width, im_channels), dtype=np.float32)            
+            cv2.circle(mask, circle_center, circle_rad, [1]*im_channels, -1, 8, 0)
             cropped_image = np.multiply(mask, image)
 
-            cropped_image_list.append(np.expand_dims(np.copy(cropped_image), axis=2)) 
+            if expand_dims:
+                cropped_image_list.append(np.expand_dims(np.copy(cropped_image), axis=2)) 
+            else:
+                cropped_image_list.append(np.copy(cropped_image)) 
 
         return cropped_image_list
 
     #rotateFrames static method
     @staticmethod
-    def rotateFrames(image_list, circle_center=(173, 130), rotate_angle=90, im_height=260, im_width=346):
+    def rotateFrames(image_list, circle_center=(173, 130), rotate_angle=90, im_height=260, im_width=346, expand_dims=False):
         
         rotated_image_list = []
 
         for image in image_list:
             rot_mat = cv2.getRotationMatrix2D(circle_center, rotate_angle, 1.0)
-            rotated_image = cv2.warpAffine(image[:,:,0], rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+            #rotated_image = cv2.warpAffine(image[:,:,0], rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+            rotated_image = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
 
-            rotated_image_list.append(np.expand_dims(np.copy(rotated_image), axis=2)) 
+            if expand_dims:
+                rotated_image_list.append(np.expand_dims(np.copy(rotated_image), axis=2)) 
+            else:
+                rotated_image_list.append(np.copy(rotated_image))
 
         return rotated_image_list
 
