@@ -228,6 +228,35 @@ class DlModels:
         
         return pool_5, conv5_3, conv4_3, conv3_3, conv2_2, conv1_2
 
+    def Conv2Dx3(input_tensor):
+        #Layer 1: Convolutional
+        conv1_1 = tf.layers.Conv2D(kernel_size=3, filters=12, strides=1, padding='same', 
+                    kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
+                    kernel_regularizer=tf2.keras.regularizers.l2(), bias_regularizer=tf2.keras.regularizers.l2(), activation='relu',
+                    name='conv1_1')(input_tensor)
+
+        #pooling function
+        pool_1 = tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_1')(conv1_1)
+
+        #Layer 2: Convolutional
+        conv2_1 = tf.layers.Conv2D(kernel_size=3, filters=12, strides=1, padding='same', 
+                    kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
+                    kernel_regularizer=tf2.keras.regularizers.l2(), bias_regularizer=tf2.keras.regularizers.l2(), activation='relu',
+                    name='conv2_1')(pool_1)
+
+        #pooling function
+        pool_2 = tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_2')(conv2_1)
+
+        #Layer 2: Convolutional
+        #conv3_1 = tf.layers.Conv2D(kernel_size=3, filters=12, strides=1, padding='same', 
+        #            kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
+        #            kernel_regularizer=tf2.keras.regularizers.l2(), bias_regularizer=tf2.keras.regularizers.l2(), activation='relu',
+        #            name='conv3_1')(pool_1)
+
+        #pooling function
+        #pool_3 = tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_4')(conv3_1)
+
+        return pool_2, pool_2, pool_1
     
     def Conv2Dx2(input_tensor):
         #Layer 1: Convolutional
@@ -428,5 +457,24 @@ class DlModels:
         carry_state = tf.identity(carry_state, name="carry_state")
 
         return output_layer, hidden_state, carry_state
+    
+    def FullyConnectedCL(input_tensor, encoder=Conv2Dx3, N_outputs=18):
+        encoder_output, layer2, layer1 = encoder(input_tensor)
+
+        flat = tf2.keras.layers.Flatten()(encoder_output)
+        
+        drouput_1 = tf2.keras.layers.Dropout(0.5)(flat)
+                
+        dense_1 = tf2.keras.layers.Dense(70, kernel_initializer='orthogonal', bias_initializer='glorot_uniform')(drouput_1)    
+        
+        drouput_2 = tf2.keras.layers.Dropout(0.5)(dense_1)
+        
+        tanh_2 = tf.keras.activations.tanh(drouput_2)  
+        
+        output_layer = tf2.keras.layers.Dense(N_outputs, kernel_initializer='orthogonal', bias_initializer='glorot_uniform')(tanh_2)        
+        
+        output_layer = tf.identity(output_layer, name="nn_last_layer")
+
+        return output_layer
 
 
