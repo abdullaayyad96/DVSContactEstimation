@@ -56,7 +56,6 @@ class TrainDL:
                 j = j+1
 
             valid_x, valid_y, valid_size = data_loader.get_validation_data()
-            initial_state_value = np.zeros(shape=(valid_size, 29, 39, 20), dtype=float)
             valid_accuracy = sess.run([accuracy_op],
                                 feed_dict={input_tensor: valid_x, truth_tensor: valid_y})
             print("Loss {} ...".format(sum_loss/j))

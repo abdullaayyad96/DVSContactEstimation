@@ -63,7 +63,7 @@ class DataLoader:
         outputs = []
         valid_size = 0
         for i in range(0, len(self.valid_idx)):
-            inputs.append(self.data_['frames_augmented_equalized'][self.valid_idx[i]])
+            inputs.append((self.data_['frames_augmented_equalized'][self.valid_idx[i]] - 128) / 128)
             reference_idx = int(self.data_['contact_status_augmented_equalized'][self.valid_idx[i]])
             one_hot_vector = [0] * 18
             one_hot_vector[reference_idx] = 1
@@ -79,8 +79,8 @@ class DataLoader:
         outputs = []
         test_size = 0
         for i in range(0, len(self.test_idx)):
-            inputs.append(self.data_['frames_augmented_equalized'][self.test_idx[i]])
-            reference_idx = np.array(self.data_['contact_status_augmented_equalized'][self.test_idx[i]])
+            inputs.append((self.data_['frames_augmented_equalized'][self.test_idx[i]] - 128) / 128)
+            reference_idx = int(self.data_['contact_status_augmented_equalized'][self.test_idx[i]])
             one_hot_vector = [0] * 18
             one_hot_vector[reference_idx] = 1
             outputs.append(one_hot_vector)

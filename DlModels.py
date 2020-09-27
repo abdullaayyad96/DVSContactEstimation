@@ -248,15 +248,15 @@ class DlModels:
         pool_2 = tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_2')(conv2_1)
 
         #Layer 2: Convolutional
-        #conv3_1 = tf.layers.Conv2D(kernel_size=3, filters=12, strides=1, padding='same', 
-        #            kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
-        #            kernel_regularizer=tf2.keras.regularizers.l2(), bias_regularizer=tf2.keras.regularizers.l2(), activation='relu',
-        #            name='conv3_1')(pool_1)
+        conv3_1 = tf.layers.Conv2D(kernel_size=3, filters=12, strides=1, padding='same', 
+                    kernel_initializer=tf2.keras.initializers.Orthogonal(), bias_initializer=tf2.keras.initializers.GlorotNormal(),
+                    kernel_regularizer=tf2.keras.regularizers.l2(), bias_regularizer=tf2.keras.regularizers.l2(), activation='relu',
+                    name='conv3_1')(pool_1)
 
         #pooling function
-        #pool_3 = tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_4')(conv3_1)
+        pool_3 = tf.layers.MaxPooling2D(pool_size=3, strides=3, padding='same', name='pool_4')(conv3_1)
 
-        return pool_2, pool_2, pool_1
+        return pool_3, pool_2, pool_1
     
     def Conv2Dx2(input_tensor):
         #Layer 1: Convolutional
